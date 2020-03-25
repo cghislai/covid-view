@@ -61,3 +61,5 @@ import 'zone.js/dist/zone';  // Included with Angular CLI.
 /***************************************************************************************************
  * APPLICATION IMPORTS
  */
+import '@amcharts/amcharts4/core';
+import '@amcharts/amcharts4/charts';
