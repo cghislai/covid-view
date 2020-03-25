@@ -1,0 +1,43 @@
+<div class="charts-route">
+
+  <div class="lists">
+    <app-country-list [allCountryRegions]="allCountryRegions$ | async"
+                      [selection]="selectedCountries$ | async"
+                      (selectionChange)="onConutrySelectionChange($event)"
+    ></app-country-list>
+  </div>
+
+  <div class="data">
+
+    <div class="filter">
+      <div class="metric">
+        <div *ngFor="let metric of allMetrics"
+             [class.selected]="selectedMetric$.getValue() === metric"
+             (click)="selectedMetric$.next(metric)"
+        >
+          {{ metric }}
+        </div>
+      </div>
+
+      <div class="interpolation">
+        <div *ngFor="let interpolation of allInterpolation"
+             [class.selected]="selectedInterpolation$.getValue() === interpolation"
+             (click)="selectedInterpolation$.next(interpolation)"
+        >
+          {{ interpolation }}
+        </div>
+      </div>
+
+    </div>
+
+    <div *ngIf="loadingChartData$ | async">
+      Chargement...
+    </div>
+
+    <app-chart [data]="chartData$ | async"
+               [regions]="selectedCountries$ | async"
+               [valueLabel]="valueLabel$ | async"
+    ></app-chart>
+  </div>
+
+</div>

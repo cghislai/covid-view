@@ -1,0 +1,36 @@
+.charts-route {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+  align-items: stretch;
+
+  > * {
+    flex: 1 1 auto;
+  }
+
+  .lists {
+    overflow-y: auto;
+    flex: 0 0 30em;
+  }
+
+  .filter {
+    >* {
+      display: inline-flex;
+      align-items: center;
+      margin: 0 1em;
+
+      >* {
+        padding: .5em;
+
+        &:hover {
+          cursor: pointer;
+        }
+
+        &.selected {
+          font-weight: bolder;
+          color: darkred;
+        }
+      }
+    }
+  }
+}
