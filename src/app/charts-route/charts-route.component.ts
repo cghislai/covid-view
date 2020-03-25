@@ -28,7 +28,7 @@ export class ChartsRouteComponent implements OnInit {
   chartSerieNames$: Observable<string[]>;
   valueLabel$: Observable<string>;
 
-  allMetrics: DailyReportMetric[] = ['confirmed', 'death', 'recovered'];
+  allMetrics: DailyReportMetric[] = ['confirmed', 'death', 'recovered', 'active'];
   allInterpolation: CountryInterpolation[] = ['none', 'population', 'surface'];
 
 
@@ -105,6 +105,9 @@ export class ChartsRouteComponent implements OnInit {
         break;
       case 'recovered':
         label = `Recovered cases`;
+        break;
+      case 'active':
+        label = `Active cases`;
         break;
     }
     switch (interpolation) {

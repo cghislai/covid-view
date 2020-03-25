@@ -1,1 +1,1 @@
-export type DailyReportMetric = 'confirmed' | 'death' | 'recovered';
+export type DailyReportMetric = 'confirmed' | 'death' | 'recovered' | 'active';

@@ -19,7 +19,7 @@ export class CountriesService {
   }
 
   listCountries$(): Observable<CountryInfo[]> {
-    return this.httpClient.get(`${this.baseHref}/assets/country-population.csv`, {
+    return this.httpClient.get(`${this.baseHref}assets/country-population.csv`, {
       responseType: 'text'
     }).pipe(
       map(d => this.parseCsv(d))

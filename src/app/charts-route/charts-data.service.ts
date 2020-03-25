@@ -150,9 +150,12 @@ export class ChartsDataService {
       case 'death':
         value = report.death;
         break;
+      case 'active':
+        value = report.confirmed - report.death - report.recovered;
+        break;
     }
-    if (value === undefined) {
-      return value;
+    if (value === undefined || isNaN(value)) {
+      return undefined;
     }
     switch (metric.countryInterpolation || 'none') {
       case 'none':
