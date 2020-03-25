@@ -3,7 +3,7 @@ import * as am4charts from '@amcharts/amcharts4/charts';
 import * as am4core from '@amcharts/amcharts4/core';
 import {AmChartDateSeries} from './am-chart-date-series';
 import {CountryRegion} from '../../domain/country-region';
-import {BehaviorSubject, Subscription} from 'rxjs';
+import {BehaviorSubject, combineLatest, Subscription} from 'rxjs';
 import {debounceTime} from 'rxjs/operators';
 
 @Component({
@@ -45,33 +45,17 @@ export class ChartComponent implements OnInit, AfterViewInit, OnDestroy {
   ngOnInit(): void {
     this.subscription = new Subscription();
 
-    const seriesSubscription = this.series$.pipe(
+    const inputSubscription = combineLatest(this.series$, this.data$, this.valueLabel$).pipe(
       debounceTime(100)
-    ).subscribe(series => {
+    ).subscribe(r => {
       if (this.chart) {
-        this.updateSeries(this.chart, series);
+        this.chart.yAxes.getIndex(0).title.text = r[2];
+        this.chart.data = r[1];
+        this.updateSeries(this.chart, r[0]);
       }
     });
 
-    const dataSubcsription = this.data$.pipe(
-      debounceTime(100)
-    ).subscribe(data => {
-      if (this.chart) {
-        this.chart.data = data;
-        // this.chart.data.splice(0, this.chart.data.length, ...data);
-      }
-    });
-
-    const labelSubscription = this.valueLabel$.pipe(
-      debounceTime(100)
-    ).subscribe(label => {
-      if (this.chart) {
-        this.chart.yAxes.getIndex(0).title.text = label;
-      }
-    });
-    this.subscription.add(seriesSubscription);
-    this.subscription.add(dataSubcsription);
-    this.subscription.add(labelSubscription);
+    this.subscription.add(inputSubscription);
   }
 
   ngAfterViewInit() {
@@ -134,7 +118,7 @@ export class ChartComponent implements OnInit, AfterViewInit, OnDestroy {
         bullet.circle.stroke = am4core.color('#fff');
         bullet.circle.strokeWidth = 2;
 
-        this.data$.next(this.data$.getValue());
+        // this.data$.next(this.data$.getValue());
       });
     });
     // this.changeDetectorRef.detectChanges();

@@ -12,8 +12,8 @@
     <div class="filter">
       <div class="metric">
         <div *ngFor="let metric of allMetrics"
-             [class.selected]="selectedMetric$.getValue() === metric"
-             (click)="selectedMetric$.next(metric)"
+             [class.selected]="(selectedMetric$ | async) === metric"
+             (click)="onMetricChange(metric)"
         >
           {{ metric }}
         </div>
@@ -21,8 +21,8 @@
 
       <div class="interpolation">
         <div *ngFor="let interpolation of allInterpolation"
-             [class.selected]="selectedInterpolation$.getValue() === interpolation"
-             (click)="selectedInterpolation$.next(interpolation)"
+             [class.selected]="(selectedInterpolation$ | async) === interpolation"
+             (click)="onInterpolationChange(interpolation)"
         >
           {{ interpolation }}
         </div>
@@ -34,7 +34,8 @@
       Chargement...
     </div>
 
-    <app-chart [data]="chartData$ | async"
+    <app-chart *ngIf="!(loadingChartData$ | async)"
+               [data]="chartData$ | async"
                [regions]="selectedCountries$ | async"
                [valueLabel]="valueLabel$ | async"
     ></app-chart>

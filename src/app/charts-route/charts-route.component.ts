@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import {BehaviorSubject, combineLatest, Observable} from 'rxjs';
 import {ChartsDataService} from './charts-data.service';
 import {debounceTime, delay, map, publishReplay, refCount, switchMap, tap} from 'rxjs/operators';
@@ -20,8 +20,8 @@ export class ChartsRouteComponent implements OnInit {
   allDates$: Observable<string[]>;
 
   selectedCountries$: Observable<CountryRegion[]>;
-  selectedMetric$ = new BehaviorSubject<DailyReportMetric>('confirmed');
-  selectedInterpolation$ = new BehaviorSubject<CountryInterpolation>('none');
+  selectedMetric$: Observable<DailyReportMetric>;
+  selectedInterpolation$: Observable<CountryInterpolation>;
 
   loadingChartData$ = new BehaviorSubject<boolean>(false);
   chartData$: Observable<AmChartDateSeries[]>;
@@ -36,6 +36,7 @@ export class ChartsRouteComponent implements OnInit {
     private chartsDataService: ChartsDataService,
     private activatedRoute: ActivatedRoute,
     private router: Router,
+    private changeDetectorRef: ChangeDetectorRef,
   ) {
   }
 
@@ -45,20 +46,31 @@ export class ChartsRouteComponent implements OnInit {
     const chartData = this.chartsDataService.reportsData$;
 
     const routeParams$ = this.activatedRoute.queryParams.pipe(
-      map(p => p.regions || ''),
-      map(p => p.split(',')),
       publishReplay(1), refCount()
     );
-    this.selectedCountries$ = combineLatest(this.allCountryRegions$, routeParams$).pipe(
+    const regionsParam$ = routeParams$.pipe(
+      map(p => p.regions || ''),
+      map(p => p.split(',')),
+    );
+    this.selectedMetric$ = routeParams$.pipe(
+      map(p => p.metric as DailyReportMetric || 'confirmed'),
+      publishReplay(1), refCount()
+    );
+    this.selectedInterpolation$ = routeParams$.pipe(
+      map(p => p.valueType as CountryInterpolation || 'population'),
+      publishReplay(1), refCount()
+    );
+
+    this.selectedCountries$ = combineLatest(this.allCountryRegions$, regionsParam$).pipe(
       map(r => this.findSelection(r[0], r[1])),
       publishReplay(1), refCount()
     );
     this.chartData$ = combineLatest(chartData, this.selectedCountries$, this.selectedMetric$, this.selectedInterpolation$).pipe(
-      debounceTime(10),
+      debounceTime(200),
       tap(a => this.loadingChartData$.next(true)),
       switchMap(r => this.searchSeries$(r[0], r[1], r[2], r[3])),
-      delay(0),
       tap(a => this.loadingChartData$.next(false)),
+      tap(() => this.changeDetectorRef.detectChanges()),
       publishReplay(1), refCount()
     );
     this.chartSerieNames$ = this.selectedCountries$.pipe(
@@ -66,6 +78,7 @@ export class ChartsRouteComponent implements OnInit {
       publishReplay(1), refCount()
     );
     this.valueLabel$ = combineLatest([this.selectedMetric$, this.selectedInterpolation$]).pipe(
+      debounceTime(100),
       map(r => this.getValueLabel(r[0], r[1])),
       publishReplay(1), refCount()
     );
@@ -79,6 +92,27 @@ export class ChartsRouteComponent implements OnInit {
         regions: paramValue
       },
       relativeTo: this.activatedRoute,
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  onMetricChange(metric: DailyReportMetric) {
+    this.router.navigate([], {
+      queryParams: {
+        metric,
+      },
+      relativeTo: this.activatedRoute,
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  onInterpolationChange(valueType: CountryInterpolation) {
+    this.router.navigate([], {
+      queryParams: {
+        valueType,
+      },
+      relativeTo: this.activatedRoute,
+      queryParamsHandling: 'merge',
     });
   }
 
@@ -122,4 +156,5 @@ export class ChartsRouteComponent implements OnInit {
     }
     return `${label}${unit}`;
   }
+
 }
