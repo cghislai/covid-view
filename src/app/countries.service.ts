@@ -1,9 +1,10 @@
-import {Injectable} from '@angular/core';
+import {Inject, Injectable} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {map} from 'rxjs/operators';
 import {CsvUtils} from '../domain/utils/csv-utils';
 import {CountryInfo} from '../domain/country-info';
 import {Observable} from 'rxjs';
+import {APP_BASE_HREF} from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
@@ -12,11 +13,13 @@ export class CountriesService {
 
   constructor(
     private httpClient: HttpClient,
+    @Inject(APP_BASE_HREF)
+    public baseHref: string
   ) {
   }
 
   listCountries$(): Observable<CountryInfo[]> {
-    return this.httpClient.get(`/assets/country-population.csv`, {
+    return this.httpClient.get(`${this.baseHref}/assets/country-population.csv`, {
       responseType: 'text'
     }).pipe(
       map(d => this.parseCsv(d))
