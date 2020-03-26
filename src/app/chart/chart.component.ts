@@ -46,7 +46,7 @@ export class ChartComponent implements OnInit, AfterViewInit, OnDestroy {
     this.subscription = new Subscription();
 
     const inputSubscription = combineLatest(this.series$, this.data$, this.valueLabel$).pipe(
-      debounceTime(100)
+      debounceTime(50)
     ).subscribe(r => {
       if (this.chart) {
         this.chart.yAxes.getIndex(0).title.text = r[2];

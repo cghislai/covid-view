@@ -66,7 +66,7 @@ export class ChartsRouteComponent implements OnInit {
       publishReplay(1), refCount()
     );
     this.chartData$ = combineLatest(chartData, this.selectedCountries$, this.selectedMetric$, this.selectedInterpolation$).pipe(
-      debounceTime(200),
+      debounceTime(50),
       tap(a => this.loadingChartData$.next(true)),
       switchMap(r => this.searchSeries$(r[0], r[1], r[2], r[3])),
       tap(a => this.loadingChartData$.next(false)),
@@ -78,7 +78,7 @@ export class ChartsRouteComponent implements OnInit {
       publishReplay(1), refCount()
     );
     this.valueLabel$ = combineLatest([this.selectedMetric$, this.selectedInterpolation$]).pipe(
-      debounceTime(100),
+      debounceTime(50),
       map(r => this.getValueLabel(r[0], r[1])),
       publishReplay(1), refCount()
     );

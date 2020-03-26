@@ -1,0 +1,48 @@
+<div class="region-select">
+
+  <header>
+    <input [ngModel]="filterQuery$ | async"
+           (ngModelChange)="filterQuery$.next($event)"
+           placeholder="Find a region..."
+           autofocus
+           name="filter-query"
+           class="filter-query"
+    >
+
+    <span class="with-info toggle-button"
+          (click)="onToggleWithInfoFilterClick()">
+      <span *ngIf="filterWithInfo$ | async">☑</span>
+      <span *ngIf="!(filterWithInfo$ | async)">☐</span>
+      <span class="i-label">i</span>
+    </span>
+
+  </header>
+
+
+  <div class="list">
+    <div *ngFor="let row of filteredCountries$ | async"
+         (click)="onSwitchSelectionClick(row)"
+         class="row">
+
+      <div class="select-icon">
+        <span *ngIf="row.selected">☑</span>
+        <span *ngIf="!row.selected">☐</span>
+      </div>
+
+      <div class="label-column">
+        <div class="label">
+          {{row.region}} ({{ row.country }})
+        </div>
+
+        <div class="info-row" *ngIf="row.hasInfo">
+          <div class="population">
+            Pop: {{ row.population | number:'.0' }}
+          </div>
+          <div class="area">
+            Area: {{ row.area | number:'.0' }} km²
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

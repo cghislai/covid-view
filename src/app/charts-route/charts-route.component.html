@@ -1,10 +1,10 @@
 <div class="charts-route">
 
   <div class="lists">
-    <app-country-list [allCountryRegions]="allCountryRegions$ | async"
-                      [selection]="selectedCountries$ | async"
-                      (selectionChange)="onConutrySelectionChange($event)"
-    ></app-country-list>
+    <app-region-select [allCountryRegions]="allCountryRegions$ | async"
+                       [selection]="selectedCountries$ | async"
+                       (selectionChange)="onConutrySelectionChange($event)"
+    ></app-region-select>
   </div>
 
   <div class="data">
@@ -34,8 +34,7 @@
       Chargement...
     </div>
 
-    <app-chart *ngIf="!(loadingChartData$ | async)"
-               [data]="chartData$ | async"
+    <app-chart [data]="chartData$ | async"
                [regions]="selectedCountries$ | async"
                [valueLabel]="valueLabel$ | async"
     ></app-chart>
