@@ -13,24 +13,48 @@
     flex: 0 0 30em;
   }
 
-  .filter {
-    >* {
-      display: inline-flex;
-      align-items: center;
-      margin: 0 1em;
+  .data {
+    flex: 1 1 auto;
+    position: relative;
 
-      >* {
-        padding: .5em;
+    .filter {
+      > * {
+        display: inline-flex;
+        align-items: center;
+        margin: 0 1em;
 
-        &:hover {
-          cursor: pointer;
-        }
+        > * {
+          padding: .5em;
 
-        &.selected {
-          font-weight: bolder;
-          color: darkred;
+          &:hover {
+            cursor: pointer;
+          }
+
+          &.selected {
+            font-weight: bolder;
+            color: darkred;
+          }
         }
       }
+    }
+
+    > .loading-panel {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+
+      z-index: 2;
+      background-color: rgba(0, 0, 0, 0.73);
+      font-size: 2em;
+      padding: 2em;
+      text-align: center;
+      color: white;
+    }
+
+    ::ng-deep #chartdiv {
+      min-height: 80vh;
     }
   }
 }

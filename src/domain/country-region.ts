@@ -1,4 +1,5 @@
 import {CountryInfo} from './country-info';
+import validate = WebAssembly.validate;
 
 export class CountryRegion {
   country: string;
@@ -14,7 +15,9 @@ export class CountryRegion {
   }
 
   idValue(): string {
-    return `${this.country.substr(0, 5)}_${this.region == null ? 'main' : this.region.substr(0, 8)}`;
+    const trimmedCountry = this.trim(this.country, 5);
+    const trimmedRegion = this.trim(this.region, 8);
+    return `${trimmedCountry}_${trimmedRegion}`;
   }
 
   labelValue() {
@@ -23,5 +26,12 @@ export class CountryRegion {
       label += ` (${this.region})`;
     }
     return label;
+  }
+
+  private trim(value: string, length: number) {
+    return value
+      .replace(/ ,_-\W/, '')
+      .toLowerCase()
+      .substr(0, length);
   }
 }

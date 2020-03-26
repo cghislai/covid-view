@@ -63,7 +63,7 @@ export class ChartsDataService {
 
   toSeriesPerCountryForCountries$(countries: CountryRegion[], reports: DailyReports[], option: ChartDataOption) {
     const countySeries$List = countries.map(c => this.createCountrySerie$(c, reports));
-    return forkJoin(countySeries$List).pipe(
+    return countySeries$List.length === 0 ? of([]) : forkJoin(countySeries$List).pipe(
       map(groupReports => this.createChartReports(groupReports, option))
     );
   }

@@ -67,10 +67,7 @@ export class ChartsRouteComponent implements OnInit {
     );
     this.chartData$ = combineLatest(chartData, this.selectedCountries$, this.selectedMetric$, this.selectedInterpolation$).pipe(
       debounceTime(50),
-      tap(a => this.loadingChartData$.next(true)),
       switchMap(r => this.searchSeries$(r[0], r[1], r[2], r[3])),
-      tap(a => this.loadingChartData$.next(false)),
-      tap(() => this.changeDetectorRef.detectChanges()),
       publishReplay(1), refCount()
     );
     this.chartSerieNames$ = this.selectedCountries$.pipe(
@@ -117,10 +114,14 @@ export class ChartsRouteComponent implements OnInit {
   }
 
   private searchSeries$(data: DailyReports[], selection: CountryRegion[], metric: DailyReportMetric, interpolation: CountryInterpolation) {
+    this.loadingChartData$.next(true);
     return this.chartsDataService.toSeriesPerCountryForCountries$(selection, data, {
       dailyMetric: metric,
       countryInterpolation: interpolation
-    });
+    }).pipe(
+      tap(a => this.loadingChartData$.next(false)),
+      // delay(10),
+    );
   }
 
   private findSelection(allRegions: CountryRegion[], idParamList: string[]) {
