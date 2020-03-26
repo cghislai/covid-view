@@ -3,6 +3,9 @@ import {CountryRegion} from '../../domain/country-region';
 import {BehaviorSubject, combineLatest, Observable, Subject} from 'rxjs';
 import {debounceTime, map, publishReplay, refCount} from 'rxjs/operators';
 import {RegionItem} from './region-item';
+import {ChartsDataService} from '../charts-route/charts-data.service';
+import {DailyReports} from '../../domain/daily-reports';
+import moment from 'moment-es6';
 
 @Component({
   selector: 'app-region-select',
@@ -31,7 +34,9 @@ export class RegionSelectComponent implements OnInit {
   filterWithInfo$ = new BehaviorSubject<boolean>(null);
   filteredCountries$: Observable<RegionItem[]>;
 
-  constructor() {
+  constructor(
+    private chartsDataService: ChartsDataService,
+  ) {
   }
 
   ngOnInit(): void {
@@ -42,12 +47,14 @@ export class RegionSelectComponent implements OnInit {
       debounceTime(300)
     );
 
+
+    const chartData$ = this.chartsDataService.reportsData$;
     this.filteredCountries$ = combineLatest(
-      this.allCountryRegionsSource$, this.countryRegionSelectionSource$,
+      this.allCountryRegionsSource$, this.countryRegionSelectionSource$, chartData$,
       debouncedFilterQuery$, debouncedFilterWithInfo$)
       .pipe(
         debounceTime(0),
-        map(r => this.createItems(r[0], r[1], r[2], r[3])),
+        map(r => this.createItems(r[0], r[1], r[2], r[3], r[4])),
         publishReplay(1), refCount(),
       );
   }
@@ -69,18 +76,26 @@ export class RegionSelectComponent implements OnInit {
     this.filterWithInfo$.next(!curValue);
   }
 
-  private createItems(countryRegions: CountryRegion[], selection: CountryRegion[],
+  private createItems(countryRegions: CountryRegion[], selection: CountryRegion[], chartData: DailyReports[],
                       filterQuery: string, filterWithInfo: boolean) {
+    const lastReports = chartData[chartData.length - 1];
+
     return countryRegions
       .filter(r => this.filterMatches(r, filterQuery, filterWithInfo))
-      .map(c => this.createGroupWithData(c, selection))
+      .map(c => this.createGroupWithData(c, selection, lastReports))
       .sort((a, b) => a.region.localeCompare(b.region));
   }
 
-  private createGroupWithData(region: CountryRegion, selection: CountryRegion[]): RegionItem {
+  private createGroupWithData(region: CountryRegion, selection: CountryRegion[], lastDailyReports: DailyReports): RegionItem {
     const population = region.info == null ? null : region.info.population;
     const area = region.info == null ? null : region.info.area;
     const selected = selection.find(r => r.idValue() === region.idValue()) != null;
+
+    const dailyReport = this.findRegionReport(lastDailyReports, region);
+    const hasReport = dailyReport != null;
+    const reportDate: Date = dailyReport == null ? null : moment(lastDailyReports.dateString, 'YYYY-MM-DD').toDate();
+    const confirmed: number = dailyReport == null ? 0 : dailyReport.confirmed;
+    const deaths: number = dailyReport == null ? 0 : dailyReport.death;
 
     return {
       countryRegion: region,
@@ -89,7 +104,11 @@ export class RegionSelectComponent implements OnInit {
       hasInfo: region.info != null,
       population,
       area,
-      selected
+      selected,
+      hasReport,
+      reportDate,
+      confirmed,
+      deaths,
     };
   }
 
@@ -118,4 +137,14 @@ export class RegionSelectComponent implements OnInit {
     this.selectionChange.next(safeSelection);
   }
 
+  private findRegionReport(lastDailyReports: DailyReports, region: CountryRegion) {
+    if (lastDailyReports == null) {
+      return null;
+    }
+    return lastDailyReports.reports
+      .find(r => {
+        return r.country === region.country
+          && r.region === region.region;
+      });
+  }
 }

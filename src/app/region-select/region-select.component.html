@@ -43,6 +43,15 @@
           </div>
         </div>
       </div>
+
+      <div class="report-column" *ngIf="row.hasReport">
+        <div class="counts">
+          <div class="confirmed">{{row.confirmed | number:'.0'}}</div>
+          <div>/</div>
+          <div class="deaths">{{row.deaths | number:'.0'}}</div>
+        </div>
+        <div class="date">{{row.reportDate | date:'shortDate'}}</div>
+      </div>
     </div>
   </div>
 </div>
