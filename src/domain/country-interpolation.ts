@@ -1,1 +1,1 @@
-export type CountryInterpolation = 'none' | 'population' | 'surface';
+export type CountryInterpolation = 'none' | 'population' | 'surface' | 'confirmed';

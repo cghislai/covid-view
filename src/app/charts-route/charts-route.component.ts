@@ -29,7 +29,7 @@ export class ChartsRouteComponent implements OnInit {
   valueLabel$: Observable<string>;
 
   allMetrics: DailyReportMetric[] = ['confirmed', 'death', 'recovered', 'active'];
-  allInterpolation: CountryInterpolation[] = ['none', 'population', 'surface'];
+  allInterpolation: CountryInterpolation[] = ['none', 'population', 'surface', 'confirmed'];
 
 
   constructor(
@@ -153,6 +153,9 @@ export class ChartsRouteComponent implements OnInit {
         break;
       case 'surface':
         unit = ' per km²';
+        break;
+      case 'confirmed':
+        unit = ' per confirmed case';
         break;
     }
     return `${label}${unit}`;

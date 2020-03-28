@@ -164,13 +164,20 @@ export class ChartsDataService {
         if (countryInfo) {
           return value * 1000 / countryInfo.population;
         } else {
-          return -1;
+          return undefined;
         }
       case 'surface':
         if (countryInfo) {
           return value / countryInfo.area;
         } else {
-          return -1;
+          return undefined;
+        }
+      case 'confirmed':
+        if (report.confirmed) {
+          return value / report.confirmed;
+          break;
+        } else {
+          return undefined;
         }
       default:
         return value;
