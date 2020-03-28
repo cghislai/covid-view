@@ -1,5 +1,13 @@
 # CovidView
 
+COVID data visualization. See it live at https://cghislai.github.io/covid-view
+
+Data sources include https://github.com/CSSEGISandData/COVID-19 and geocoding for a list of countries information (population/area).
+
+--
+
+
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 9.0.7.
 
 ## Development server
