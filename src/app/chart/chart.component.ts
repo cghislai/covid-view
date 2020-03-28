@@ -84,15 +84,20 @@ export class ChartComponent implements OnInit, AfterViewInit, OnDestroy {
       chart.data = this.data$.getValue();
 
       const dateAxis = chart.xAxes.push(new am4charts.DateAxis());
-      dateAxis.title.text = 'Time';
+      dateAxis.title.text = 'Date';
       dateAxis.renderer.grid.template.location = 0;
-      dateAxis.renderer.minGridDistance = 30;
+      dateAxis.renderer.minGridDistance = 60;
+      dateAxis.dateFormats.setKey('day', 'dd');
+      dateAxis.periodChangeDateFormats.setKey('day', 'dd MMM');
 
       const yAxis = chart.yAxes.push(new am4charts.ValueAxis());
       yAxis.title.text = this.valueLabel$.getValue();
 
 
       chart.cursor = new am4charts.XYCursor();
+      chart.cursor.behavior = 'zoomXY';
+      chart.cursor.maxTooltipDistance = 20;
+
       chart.legend = new am4charts.Legend();
 
       this.chart = chart;
@@ -113,6 +118,7 @@ export class ChartComponent implements OnInit, AfterViewInit, OnDestroy {
         series.name = countryRegion.labelValue();
         series.strokeWidth = 2;
         series.tooltipText = '{name}: [b]{valueY}[/]';
+        series.legendSettings.itemValueText = '[bold]{valueY}[/bold]';
 
         const bullet = series.bullets.push(new am4charts.CircleBullet());
         bullet.circle.stroke = am4core.color('#fff');
