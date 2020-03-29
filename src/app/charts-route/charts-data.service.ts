@@ -117,71 +117,93 @@ export class ChartsDataService {
 
   private createChartReports(reports: ChartDateSerie[], options: ChartDataOption): AmChartDateSeries[] {
     const dates = this.covidDataService.listSeriesDates(reports);
-    return dates.map(dateString => {
-      const dayReports = reports.map(r => this.findDayReport(dateString, r))
+    const datesCount = dates.length;
+    const amChartSeries: AmChartDateSeries[] = [];
+
+    let curDate;
+    let prevDate;
+    for (let dateIndex = 0; dateIndex < datesCount; dateIndex++) {
+      prevDate = curDate;
+      curDate = dates[dateIndex];
+
+      const dayReports = reports.map(r => this.findDayReport(curDate, r))
+        .filter(d => d != null);
+      const prevReports = prevDate == null ? [] : reports.map(r => this.findDayReport(prevDate, r))
         .filter(d => d != null);
 
-      const dateValue = moment(dateString, 'YYYY-MM-DD').toDate();
+      const dateValue = moment(curDate, 'YYYY-MM-DD').toDate();
       const dataSerie = {
         date: dateValue,
       } as AmChartDateSeries & any;
 
       dayReports.forEach(d => {
-        dataSerie[d.id] = this.getMetricValue(d, d.countryRegion.info, options);
+        dataSerie[d.id] = this.getMetricValue(d, prevReports, d.countryRegion.info, options);
       });
-      return dataSerie;
-    });
+      amChartSeries.push(dataSerie);
+    }
+    return amChartSeries;
   }
 
   private findDayReport(day: string, serie: ChartDateSerie) {
     return serie.data.find(d => d.dateString === day);
   }
 
-
-  private getMetricValue(report: ChartGroupReport, countryInfo: CountryInfo, metric: ChartDataOption) {
-    let value = undefined;
-    switch (metric.dailyMetric || 'confirmed') {
-      case 'confirmed':
-        value = report.confirmed;
-        break;
-      case 'recovered':
-        value = report.recovered;
-        break;
-      case 'death':
-        value = report.death;
-        break;
-      case 'active':
-        value = report.confirmed - report.death - report.recovered;
-        break;
-    }
-    if (value === undefined || isNaN(value)) {
+  private getMetricValue(report: ChartGroupReport, yesterdayReports: ChartGroupReport[], countryInfo: CountryInfo, metric: ChartDataOption) {
+    const safeMetric = metric.dailyMetric || 'confirmed';
+    const baseValue = this.getMetricBaseValue(safeMetric, report);
+    if (baseValue === undefined || isNaN(baseValue)) {
       return undefined;
     }
     switch (metric.countryInterpolation || 'none') {
       case 'none':
-        return value;
+        return baseValue;
       case 'population':
         if (countryInfo) {
-          return value * 1000 / countryInfo.population;
+          return baseValue * 1000 / countryInfo.population;
         } else {
           return undefined;
         }
       case 'surface':
         if (countryInfo) {
-          return value / countryInfo.area;
+          return baseValue / countryInfo.area;
         } else {
           return undefined;
         }
       case 'confirmed':
         if (report.confirmed) {
-          return value / report.confirmed;
-          break;
+          return baseValue / report.confirmed;
         } else {
           return undefined;
         }
+      case 'time-to-double': {
+        const prevReport = yesterdayReports.find(r => r.countryRegion.idValue() === report.countryRegion.idValue());
+        if (prevReport) {
+          const prevValue = this.getMetricBaseValue(safeMetric, prevReport);
+          const dValue = baseValue - prevValue;
+          // (xj - xi)* t = 2*xj
+          // t = 2*xj / diffX
+          return dValue === 0 ? undefined : 2 * baseValue / dValue;
+        } else {
+          return undefined;
+        }
+      }
       default:
-        return value;
+        return baseValue;
     }
+  }
+
+  private getMetricBaseValue(safeMetric: 'confirmed' | 'death' | 'recovered' | 'active', report: ChartGroupReport) {
+    switch (safeMetric) {
+      case 'confirmed':
+        return report.confirmed;
+      case 'recovered':
+        return report.recovered;
+      case 'death':
+        return report.death;
+      case 'active':
+        return report.confirmed - report.death - report.recovered;
+    }
+    return undefined;
   }
 
   private createCountryRegionWithInfo(infos: CountryInfo[], regions: CountryRegion[]) {

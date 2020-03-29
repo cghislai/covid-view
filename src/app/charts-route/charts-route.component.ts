@@ -29,7 +29,7 @@ export class ChartsRouteComponent implements OnInit {
   valueLabel$: Observable<string>;
 
   allMetrics: DailyReportMetric[] = ['confirmed', 'death', 'recovered', 'active'];
-  allInterpolation: CountryInterpolation[] = ['none', 'population', 'surface', 'confirmed'];
+  allInterpolation: CountryInterpolation[] = ['none', 'population', 'surface', 'confirmed', 'time-to-double'];
 
 
   constructor(
@@ -157,6 +157,8 @@ export class ChartsRouteComponent implements OnInit {
       case 'confirmed':
         unit = ' per confirmed case';
         break;
+      case 'time-to-double':
+        unit = ' (days to double according to day\'s progression)';
     }
     return `${label}${unit}`;
   }
